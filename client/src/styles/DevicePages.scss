@@ -1,0 +1,17 @@
+.devicePages{
+    width: 100%;
+    .top{
+        width: 100%;
+        .details{
+            padding: 20px;
+            width: 100%;
+            display: flex;
+            .preview{
+                width: 187.5px;
+                height: 333.5px;
+                border-radius: 10px;
+            }
+        }
+
+    }
+}
