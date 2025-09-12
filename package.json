@@ -17,11 +17,11 @@
   "type": "commonjs",
   "devDependencies": {
     "cross-env": "^10.0.0",
-    "electron": "^38.1.0"
+    "electron": "^38.1.0",
+    "electron-builder": "^26.0.12"
   },
   "dependencies": {
     "concurrently": "^9.2.1",
-    "electron-builder": "^26.0.12",
     "wait-on": "^8.0.4"
   },
   "build": {
@@ -32,19 +32,30 @@
       "node_modules/**/*",
       "main.js",
       "package.json",
+      "bin/**/*",
+      "api/**/*",
+      "utils/**/*",
+      "client/build/**/*",
+      "preload.js",
+      "assets/**/*"
+    ],
+    "asarUnpack": [
       "bin/**/*"
     ],
     "directories": {
       "buildResources": "assets"
     },
     "mac": {
-      "target": "dmg"
+      "target": "dmg",
+      "icon": "assets/icon/nodata-search.icns"
     },
     "win": {
-      "target": "nsis"
+      "target": "nsis",
+      "icon": "assets/icon/nodata-search.ico"
     },
     "linux": {
-      "target": "AppImage"
+      "target": "AppImage",
+      "icon": "assets/icon"
     }
   }
 }

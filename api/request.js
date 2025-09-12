@@ -1,5 +1,6 @@
 const { ipcMain } = require('electron');
-const { getScrcpyPath } = require('../utils/getScrcpyPath')
+const path = require('path');
+const { getScrcpyPath, getAdbPath } = require('../utils/getScrcpyPath');
 const { exec, spawn } = require('child_process');
 
 /**
@@ -8,7 +9,8 @@ const { exec, spawn } = require('child_process');
 function getAdbDeviceInfo() {
     ipcMain.handle("check-usb-device", async () => {
         return new Promise((resolve, reject) => {
-            exec("adb devices", (err, stdout) => {
+            const adbPath = getAdbPath();
+            exec(`"${adbPath}" devices`, (err, stdout) => {
                 if (err) {
                     return reject(err);
                 }
@@ -17,10 +19,10 @@ function getAdbDeviceInfo() {
                     .map(line => line.trim())
                     .filter(line => line && line.endsWith("device"))
                     .map(line => line.split("\t")[0]);
-    
+
                 resolve(devices); // 返回设备 ID 数组
             });
-        }); 
+        });
     })
 }
 
@@ -30,7 +32,8 @@ function getAdbDeviceInfo() {
 function getDeviceInfo() {
     const execAsync = (cmd, deviceId) => {
         return new Promise((resolve) => {
-            const fullCmd = deviceId ? `adb -s ${deviceId} ${cmd}` : `adb ${cmd}`;
+            const adbPath = getAdbPath();
+            const fullCmd = deviceId ? `"${adbPath}" -s ${deviceId} ${cmd}` : `"${adbPath}" ${cmd}`;
             exec(fullCmd, { encoding: "utf8" }, (err, stdout) => {
                 if (err) {
                     console.warn(`[ADB] 命令失败: ${fullCmd}`, err.message);
@@ -152,11 +155,19 @@ function formatUptime(seconds) {
 function returnDeviceScreenshot() {
     ipcMain.handle("get-device-screenshot", async (event, deviceId) => {
         return new Promise((resolve, reject) => {
-            exec(`adb -s ${deviceId} exec-out screencap -p`, { encoding: "buffer" }, (err, stdout) => {
-                if (err) return reject(err);
-                // 返回 base64 字符串
-                resolve(`data:image/png;base64,${stdout.toString("base64")}`);
+            const adbPath = getAdbPath();
+            const child = spawn(adbPath, ["-s", deviceId, "exec-out", "screencap", "-p"], { stdio: ["ignore", "pipe", "pipe"] });
+            const chunks = [];
+
+            child.stdout.on("data", (chunk) => chunks.push(chunk));
+            child.stderr.on("data", (chunk) => console.error(chunk.toString()));
+
+            child.on("close", () => {
+                const buffer = Buffer.concat(chunks);
+                resolve(`data:image/png;base64,${buffer.toString("base64")}`);
             });
+
+            child.on("error", (err) => reject(err));
         });
     });
 }
@@ -165,13 +176,48 @@ function returnDeviceScreenshot() {
  * 打开scrcpy
  */
 function openScrcpy() {
-    ipcMain.on("open-scrcpy", (event, deviceId) => {
-        const scrcpyPath = getScrcpyPath();
-        const args = deviceId ? ["-s", deviceId, "--always-on-top"] : ["--always-on-top"];
-        const child = spawn(scrcpyPath, args, { stdio: "inherit" });
+    ipcMain.handle("open-scrcpy", async (event, deviceId) => {
+        try {
+            const scrcpyPath = getScrcpyPath();
 
-        child.on("close", (code) => {
-            console.log(`scrcpy exited with code ${code}`);
+            // 参数拼接
+            const args = deviceId
+                ? ["-s", deviceId, "--always-on-top"]
+                : ["--always-on-top"];
+
+            console.log("启动 scrcpy:", scrcpyPath, args.join(" "));
+
+            // spawn 启动 scrcpy
+            const child = spawn(scrcpyPath, args, { stdio: "inherit" });
+
+            child.on("close", (code) => {
+                console.log(`scrcpy exited with code ${code}`);
+            });
+
+            return { success: true, message: "scrcpy 已启动" };
+        } catch (err) {
+            console.error("启动 scrcpy 出错:", err);
+            return { success: false, message: err.message };
+        }
+    });
+}
+
+/**
+ * 发送重启命令
+ */
+function sendReboot() {
+    ipcMain.handle("send-reboot", async (event, deviceId) => {
+        return new Promise((resolve, reject) => {
+            const adbPath = getAdbPath();
+            const fullCmd = deviceId ? `"${adbPath}" -s ${deviceId} reboot` : `"${adbPath}" reboot`;
+            exec(fullCmd, { encoding: "utf8" }, (err, stdout) => {
+                if (err) {
+                    console.warn(`[ADB] 命令失败: ${fullCmd}`, err.message);
+                    resolve({ success: false, message: err.message }); // 失败返回空
+                } else {
+                    resolve({ success: true, message: "设备已重启" });
+                }
+            });
         });
     });
 }
@@ -180,5 +226,6 @@ module.exports = {
     getAdbDeviceInfo,
     openScrcpy,
     returnDeviceScreenshot,
-    getDeviceInfo
+    getDeviceInfo,
+    sendReboot
 }

@@ -1,15 +1,39 @@
 .devicePages{
     width: 100%;
+    height: 100%;
+    overflow: auto;
     .top{
         width: 100%;
         .details{
             padding: 20px;
             width: 100%;
             display: flex;
-            .preview{
+            justify-content: space-between;
+            .details_left{
                 width: 187.5px;
-                height: 333.5px;
-                border-radius: 10px;
+                .preview{
+                    width: 187.5px;
+                    height: 333.5px;
+                    border-radius: 10px;
+                }
+                .device_btn,
+                .dangerBox{
+                    display: flex;
+                    flex-direction: column;
+                    align-items: center;
+                    .danger{
+                        margin: 5px 0;
+                    }
+                }
+                .note{
+                    font-size: 5px;
+                    color: #ccc;
+                    text-align: center;
+                }
+            }
+            
+            .info{
+                width: calc(100% - 200px);
             }
         }
 

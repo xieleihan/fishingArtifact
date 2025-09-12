@@ -1,11 +1,13 @@
 const {app,BrowserWindow} = require('electron');
 const path = require('path');
-const { getAdbDeviceInfo,openScrcpy,returnDeviceScreenshot,getDeviceInfo } = require('./api/request')
+const requestPath = path.join(__dirname, 'api', 'request');
+const { getAdbDeviceInfo, openScrcpy, returnDeviceScreenshot, getDeviceInfo, sendReboot } = require(requestPath);
 
 getAdbDeviceInfo()
 openScrcpy()
 returnDeviceScreenshot()
 getDeviceInfo()
+sendReboot()
 
 /**
  * 创建Windows窗口
@@ -18,7 +20,8 @@ function createWindow() {
             contextIsolation: true,
             nodeIntegration: true,
             preload: path.join(__dirname, 'preload.js') // 预加载
-        }
+        },
+        icon: path.join(__dirname, 'assets', 'icon', 'nodata-search.png') // 应用图标
     });
 
     if (process.env.NODE_ENV === 'development') {
@@ -30,6 +33,9 @@ function createWindow() {
     // 开发者工具(dev使用)
     if (process.env.NODE_ENV === 'development') { 
         win.webContents.openDevTools();
+    } else {
+        win.webContents.openDevTools();
+        
     }
 }
 

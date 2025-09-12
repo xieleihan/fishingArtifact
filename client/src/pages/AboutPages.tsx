@@ -1,7 +1,9 @@
 function AboutPages() {
     return (
         <>
-            435456
+            <section>
+                
+            </section>
         </>
     )
 }

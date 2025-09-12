@@ -4,6 +4,9 @@ import { lazy, Suspense } from 'react';
 // 导入Antd组件
 import { Spin } from 'antd';
 
+// 导入Navigate组件
+import { Navigate } from 'react-router-dom';
+
 const App = lazy(() => import('../App')) // 主视图
 const DevicePages = lazy(() => import('../pages/DevicePages')) // 设备页面
 const AboutPages = lazy(() => import('../pages/AboutPages')) // 关于页面
@@ -17,6 +20,10 @@ const routes = [
             </Suspense>
         ),
         children: [
+            {
+                index: true, // 访问 / 时默认渲染
+                element: <Navigate to="/device" replace />
+            },
             {
                 path: 'device',
                 element: (
