@@ -1,0 +1,12 @@
+.terminalPages{
+    width: 100%;
+    height: 100dvh;
+    padding: 20px;
+    .top{
+        width: 100%;
+        display: flex;
+        .sendButton{
+            margin-left: 20px;
+        }
+    }
+}

@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import '../styles/DevicePages.scss';
-import { Card, Descriptions, Button,Image,Modal } from "antd";
+import { Card, Descriptions, Button, Image, Modal, Empty } from "antd";
+import { LeftOutlined, AndroidOutlined, LockOutlined } from '@ant-design/icons';
 interface deviceInfoProps {
     androidVersion: string;
     batteryLevel: number;
@@ -142,7 +143,7 @@ function DevicePages() {
                     <div className="details">
                         <div className="details_left">
                             <Image
-                                src={screenshot}
+                                src={screenshot || undefined}
                                 alt="scrcpy预览"
                                 className="preview"
                                 preview={true}
@@ -159,11 +160,23 @@ function DevicePages() {
                             </span>
                             <div className="dangerBox">
                                 <Button onClick={handleReboot} className="danger" type="primary" danger>一键重启</Button>
-                                <Button className="danger" type="primary" danger>一键BL模式</Button>
+                                <Button className="danger" type="primary" danger>进入引导</Button>
                             </div>
                         </div>
                         <div className="info">
-                            <Card title="设备信息">
+                            <Card title="设备信息" extra={
+                                <>
+                                    <Button onClick={() => {
+                                        window.electronAPI.invoke("send-back-key");
+                                    }} className="basis_btn" icon={<LeftOutlined />}>返回</Button>
+                                    <Button onClick={() => {
+                                        window.electronAPI.invoke("send-home-key");
+                                    }} className="basis_btn" icon={<AndroidOutlined />}>首页</Button>
+                                    <Button onClick={() => {
+                                        window.electronAPI.invoke("send-lock-screen");
+                                    }} className="basis_btn" icon={<LockOutlined />}>一键锁屏</Button>
+                                </>
+                            }>
                                 <Descriptions column={1} bordered size="small">
                                     <Descriptions.Item label="当前安卓版本">{deviceInfo.androidVersion}</Descriptions.Item>
                                     <Descriptions.Item label="当前设备电量">{deviceInfo.batteryLevel}%</Descriptions.Item>
@@ -182,7 +195,9 @@ function DevicePages() {
                         </div>
                     </div>
                 ) : (
-                    <p>未检测到设备</p>
+                    <div className="noDevice">
+                            <Empty description="未连接设备" />
+                    </div>
                 )}
             </div>
             <Modal

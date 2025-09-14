@@ -222,10 +222,75 @@ function sendReboot() {
     });
 }
 
+/**
+ * 发送返回键的adb命令
+ */
+function sendBackKey() {
+    ipcMain.handle("send-back-key", async (event, deviceId) => {
+        return new Promise((resolve, reject) => {
+            const adbPath = getAdbPath();
+            const fullCmd = deviceId ? `"${adbPath}" -s ${deviceId} shell input keyevent 4` : `"${adbPath}" shell input keyevent 4`;
+            exec(fullCmd, { encoding: "utf8" }, (err, stdout) => {
+                if (err) {
+                    console.warn(`[ADB] 命令失败: ${fullCmd}`, err.message);
+                    resolve({ success: false, message: err.message }); // 失败返回空
+                } else {
+                    resolve({ success: true, message: "已发送返回键" });
+                }
+            });
+        });
+    });
+}
+
+/**
+ * 发送锁屏命令
+ */
+function sendLockScreen() {
+    ipcMain.handle("send-lock-screen", async (event, deviceId) => {
+        return new Promise((resolve, reject) => {
+            const adbPath = getAdbPath();
+            const fullCmd = deviceId ? `"${adbPath}" -s ${deviceId} shell input keyevent 26` : `"${adbPath}" shell input keyevent 26`;
+            exec(fullCmd, { encoding: "utf8" }, (err, stdout) => {
+                if (err) {
+                    console.warn(`[ADB] 命令失败: ${fullCmd}`, err.message);
+                    resolve({ success: false, message: err.message }); // 失败返回空
+                }
+                else {
+                    resolve({ success: true, message: "已发送锁屏键" });
+                }
+            });
+        });
+    });
+}
+
+/**
+ * 返回首页的adb命令
+ */
+function sendHomeKey() {
+    ipcMain.handle("send-home-key", async (event, deviceId) => {
+        return new Promise((resolve, reject) => {
+            const adbPath = getAdbPath();
+            const fullCmd = deviceId ? `"${adbPath}" -s ${deviceId} shell input keyevent 3` : `"${adbPath}" shell input keyevent 3`;
+            exec(fullCmd, { encoding: "utf8" }, (err, stdout) => {
+                if (err) {
+                    console.warn(`[ADB] 命令失败: ${fullCmd}`, err.message);
+                    resolve({ success: false, message: err.message }); // 失败返回空
+                }
+                else {
+                    resolve({ success: true, message: "已发送首页键" });
+                }
+            });
+        });
+    });
+}
+
 module.exports = {
     getAdbDeviceInfo,
     openScrcpy,
     returnDeviceScreenshot,
     getDeviceInfo,
-    sendReboot
+    sendReboot,
+    sendBackKey,
+    sendLockScreen,
+    sendHomeKey
 }

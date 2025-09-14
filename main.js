@@ -1,13 +1,16 @@
 const {app,BrowserWindow} = require('electron');
 const path = require('path');
 const requestPath = path.join(__dirname, 'api', 'request');
-const { getAdbDeviceInfo, openScrcpy, returnDeviceScreenshot, getDeviceInfo, sendReboot } = require(requestPath);
+const { getAdbDeviceInfo, openScrcpy, returnDeviceScreenshot, getDeviceInfo, sendReboot, sendBackKey, sendLockScreen, sendHomeKey } = require(requestPath);
 
 getAdbDeviceInfo()
 openScrcpy()
 returnDeviceScreenshot()
 getDeviceInfo()
 sendReboot()
+sendBackKey()
+sendLockScreen()
+sendHomeKey()
 
 /**
  * 创建Windows窗口

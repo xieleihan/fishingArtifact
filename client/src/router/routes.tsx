@@ -9,6 +9,7 @@ import { Navigate } from 'react-router-dom';
 
 const App = lazy(() => import('../App')) // 主视图
 const DevicePages = lazy(() => import('../pages/DevicePages')) // 设备页面
+const TerminalPages = lazy(() => import('../pages/TerminalPages')) // 终端页面
 const AboutPages = lazy(() => import('../pages/AboutPages')) // 关于页面
 
 const routes = [
@@ -37,6 +38,14 @@ const routes = [
                 element: (
                     <Suspense fallback={<Spin size="large" />}>
                         <AboutPages />
+                    </Suspense>
+                )
+            },
+            {
+                path: 'terminal',
+                element: (
+                    <Suspense fallback={<Spin size="large" />}>
+                        <TerminalPages />
                     </Suspense>
                 )
             }

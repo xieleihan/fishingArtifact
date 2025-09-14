@@ -2,6 +2,7 @@ import './App.scss';
 // 导入图标
 import Device from './assets/icon/device.svg';
 import About from './assets/icon/about.svg';
+import Terminal from './assets/icon/terminal.svg';
 
 import { useState } from 'react';
 import {Outlet,Link} from 'react-router-dom';
@@ -15,6 +16,12 @@ function App() {
       icon: Device,
       activity: '#307dee',
       link: '/device'
+    },
+    {
+      title:'终端',
+      icon: Terminal,
+      activity: '#307dee',
+      link: '/terminal'
     },
     {
       title: '关于',
