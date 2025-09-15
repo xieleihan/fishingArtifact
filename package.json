@@ -1,7 +1,7 @@
 {
   "name": "fishingartifact",
   "version": "1.0.0",
-  "description": "",
+  "description": "Fishing Artifact 是一个跨平台的桌面应用程序",
   "main": "main.js",
   "scripts": {
     "start": "concurrently -n REACT,ELECTRON -c green,blue \"npm run start:react\" \"npm run start:electron\"",
@@ -27,9 +27,12 @@
   "build": {
     "appId": "com.example.fishingartifact",
     "productName": "Fishing Artifact",
+    "asar": true, 
     "files": [
       "build/**/*",
-      "node_modules/**/*",
+      "node_modules/concurrently/**/*",
+      "node_modules/wait-on/**/*",
+      "node_modules/electron/**/*",
       "main.js",
       "package.json",
       "bin/**/*",
@@ -37,17 +40,39 @@
       "utils/**/*",
       "client/build/**/*",
       "preload.js",
-      "assets/**/*"
+      "assets/**/*",
+      "!**/locales/*"
     ],
     "asarUnpack": [
       "bin/**/*"
+    ],
+    "extraResources": [
+      {
+        "from": "node_modules/electron/dist/locales",
+        "to": "locales",
+        "filter": [
+          "en.pak",
+          "zh-CN.pak"
+        ]
+      }
     ],
     "directories": {
       "buildResources": "assets"
     },
     "mac": {
       "target": "dmg",
-      "icon": "assets/icon/nodata-search.icns"
+      "icon": "assets/icon/nodata-search.icns",
+      "artifactName": "FishingArtifact-mac-${version}.dmg"
+    },
+    "nsis":{
+      "oneClick": false,
+      "allowToChangeInstallationDirectory": true,
+      "perMachine": true,
+      "createDesktopShortcut": true,
+      "createStartMenuShortcut": true,
+      "license": "assets/license.txt",
+      "artifactName": "FishingArtifact-win-${version}.exe"
+
     },
     "win": {
       "target": "nsis",
@@ -55,7 +80,8 @@
     },
     "linux": {
       "target": "AppImage",
-      "icon": "assets/icon"
+      "icon": "assets/icon",
+      "artifactName": "FishingArtifact-linux-${version}.AppImage"
     }
   }
 }

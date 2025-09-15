@@ -1,30 +1,57 @@
-const {app,BrowserWindow} = require('electron');
+const { app, BrowserWindow } = require('electron');
 const path = require('path');
 const requestPath = path.join(__dirname, 'api', 'request');
-const { getAdbDeviceInfo, openScrcpy, returnDeviceScreenshot, getDeviceInfo, sendReboot, sendBackKey, sendLockScreen, sendHomeKey } = require(requestPath);
+const { getAdbDeviceInfo,
+    openScrcpy,
+    returnDeviceScreenshot,
+    getDeviceInfo,
+    sendReboot,
+    sendBackKey,
+    sendLockScreen,
+    sendHomeKey,
+    sendBootloader,
+    sendUnlockBootloader,
+    sendLockBootloader,
+    sendFactoryReset,
+    sendRecoveryMode,
+    sendAdbCommand,
+    installApk,
+    openFileDialog
+} = require(requestPath);
 
-getAdbDeviceInfo()
-openScrcpy()
-returnDeviceScreenshot()
-getDeviceInfo()
-sendReboot()
-sendBackKey()
-sendLockScreen()
-sendHomeKey()
+// 注册所有 IPC 处理程序
+getAdbDeviceInfo();
+openScrcpy();
+returnDeviceScreenshot();
+getDeviceInfo();
+sendReboot();
+sendBackKey();
+sendLockScreen();
+sendHomeKey();
+sendBootloader();
+sendUnlockBootloader();
+sendLockBootloader();
+sendFactoryReset();
+sendRecoveryMode();
+sendAdbCommand();
+installApk();
+openFileDialog();
 
 /**
  * 创建Windows窗口
  */
-function createWindow() { 
+function createWindow() {
     const win = new BrowserWindow({
         width: 800,
         height: 600,
+        title: "Fishing Artifact",
         webPreferences: {
-            contextIsolation: true,
-            nodeIntegration: true,
+            contextIsolation: true, // 保护上下文
+            nodeIntegration: true, // 禁用Node.js（为了安全）
             preload: path.join(__dirname, 'preload.js') // 预加载
         },
-        icon: path.join(__dirname, 'assets', 'icon', 'nodata-search.png') // 应用图标
+        icon: path.join(__dirname, 'assets', 'icon', 'nodata-search.png'), // 应用图标
+        autoHideMenuBar: true
     });
 
     if (process.env.NODE_ENV === 'development') {
@@ -34,11 +61,8 @@ function createWindow() {
     }
 
     // 开发者工具(dev使用)
-    if (process.env.NODE_ENV === 'development') { 
+    if (process.env.NODE_ENV === 'development') {
         win.webContents.openDevTools();
-    } else {
-        win.webContents.openDevTools();
-        
     }
 }
 

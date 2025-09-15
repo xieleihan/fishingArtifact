@@ -2,6 +2,8 @@ import { useEffect, useState } from "react";
 import '../styles/DevicePages.scss';
 import { Card, Descriptions, Button, Image, Modal, Empty } from "antd";
 import { LeftOutlined, AndroidOutlined, LockOutlined } from '@ant-design/icons';
+import { useNavigate } from "react-router-dom";
+
 interface deviceInfoProps {
     androidVersion: string;
     batteryLevel: number;
@@ -18,6 +20,7 @@ interface deviceInfoProps {
     uptime: string;
 }
 
+
 function DevicePages() {
     const [device, setDevice] = useState<string | null>(null); // ADB设备的id
     const [screenshot, setScreenshot] = useState<string>("");
@@ -26,6 +29,7 @@ function DevicePages() {
     const [open, setOpen] = useState(false); // 控制模态框显示
     const [confirmLoading, setConfirmLoading] = useState(false); // 确认按钮加载状态
     const [modalText, setModalText] = useState(''); // 模态框内容
+    const [btnType, setBtnType] = useState('reboot'); // 按钮类型
 
     const [deviceInfo, setDeviceInfo] = useState<deviceInfoProps>({
         androidVersion: "未知",
@@ -42,6 +46,8 @@ function DevicePages() {
         serial: "",
         uptime: "0分钟"
     });
+
+    const navigate = useNavigate();
 
     // 初始化获取设备
     useEffect(() => {
@@ -111,25 +117,103 @@ function DevicePages() {
     function handleReboot() { 
         setOpen(true);
         setModalText("一键重启将会立即重启设备，未保存的数据将会丢失，是否继续？");
+        setBtnType("reboot");
     }
 
-    const handleOk = () => {
-        setModalText("正在重启设备，请稍后...");
+    const handleOk = (type:string) => {
+        
         setConfirmLoading(true);
-        window.electronAPI.invoke("send-reboot",device).then(() => {
-            setModalText("重启命令已发送，设备正在重启中...");
-            setTimeout(() => {
-                setOpen(false);
-                setConfirmLoading(false);
-            }, 2000);
-        }).catch((err: any) => {
-            setModalText("重启设备失败，请稍后再试");
-            console.error("重启设备失败", err);
-            setTimeout(() => {
-                setOpen(false);
-                setConfirmLoading(false);
-            }, 2000);
-        });
+        switch (type) {
+            case "reboot":
+                setModalText("正在重启设备，请稍后...");
+                window.electronAPI.invoke("send-reboot", device).then(() => {
+                    setModalText("重启命令已发送，设备正在重启中...");
+                    setTimeout(() => {
+                        setOpen(false);
+                        setConfirmLoading(false);
+                    }, 2000);
+                }).catch((err: any) => {
+                    setModalText("重启设备失败，请稍后再试");
+                    console.error("重启设备失败", err);
+                    setTimeout(() => {
+                        setOpen(false);
+                        setConfirmLoading(false);
+                    }, 2000);
+                });
+                break;
+            case "bootloader":
+                setModalText("正在进入引导模式，请稍后...");
+                window.electronAPI.invoke("send-bootloader", device).then(() => {
+                    setModalText("进入引导模式命令已发送，设备正在重启中...");
+                    setTimeout(() => {
+                        setOpen(false);
+                        setConfirmLoading(false);
+                    }, 2000);
+                }).catch((err: any) => {
+                    setModalText("进入引导模式失败，请稍后再试");
+                    console.error("进入引导模式失败", err);
+                    setTimeout(() => {
+                        setOpen(false);
+                        setConfirmLoading(false);
+                    }, 2000);
+                });
+                break;
+            
+            case "recovery":
+                setModalText("正在进入REC模式，请稍后...");
+                window.electronAPI.invoke("send-recovery-mode", device).then(() => {
+                    setModalText("进入REC模式命令已发送，设备正在重启中...");
+                    setTimeout(() => {
+                        setOpen(false);
+                        setConfirmLoading(false);
+                    }, 2000);
+                }).catch((err: any) => {
+                    setModalText("进入REC模式失败，请稍后再试");
+                    console.error("进入REC模式失败", err);
+                    setTimeout(() => {
+                        setOpen(false);
+                        setConfirmLoading(false);
+                    }, 2000);
+                });
+                break;
+            case "factoryReset":
+                setModalText("正在恢复出厂设置，请稍后...");
+                window.electronAPI.invoke("send-factory-reset", device).then(() => {
+                    setModalText("恢复出厂设置命令已发送，设备正在重启中...");
+                    setTimeout(() => {
+                        setOpen(false);
+                        setConfirmLoading(false);
+                    }, 2000);
+                }).catch((err: any) => {
+                    setModalText("恢复出厂设置失败，请稍后再试");
+                    console.error("恢复出厂设置失败", err);
+                    setTimeout(() => {
+                        setOpen(false);
+                        setConfirmLoading(false);
+                    }, 2000);
+                });
+                break;
+        }
+    };
+
+    const handleBootloader = () => {
+        setOpen(true);
+        setModalText("进入引导模式将会使设备重新启动并进入Bootloader界面，是否继续？");
+        setBtnType("bootloader");
+    };
+
+    
+
+    const handerRecovery = () => {
+        setOpen(true);
+        setModalText("一键REC将会使设备重新启动并进入Recovery界面，是否继续？");
+        setBtnType("recovery");
+    };
+
+    const handerFactoryReset = () => {
+        setOpen(true);
+        setModalText("恢复出厂将会清除设备上的所有数据并恢复到出厂设置，是否继续？");
+        setBtnType("factoryReset");
     };
 
     const handleCancel = () => {
@@ -154,13 +238,20 @@ function DevicePages() {
                                 <Button type="primary" onClick={handleConnect}>
                                     连接设备
                                 </Button>
+                                <Button onClick={() => {
+                                    navigate('/upload');
+                                }} color="cyan">
+                                    上传应用
+                                </Button>
                             </div>
                             <span className="note">
                                 注意：此处预览仅为截图，点击“连接设备”按钮将打开scrcpy窗口进行操作
                             </span>
                             <div className="dangerBox">
                                 <Button onClick={handleReboot} className="danger" type="primary" danger>一键重启</Button>
-                                <Button className="danger" type="primary" danger>进入引导</Button>
+                                <Button onClick={handleBootloader} className="danger" type="primary" danger>进入引导</Button>
+                                <Button onClick={handerRecovery} className="danger" type="primary" danger>一键REC</Button>
+                                <Button onClick={handerFactoryReset} className="danger" type="primary" danger>恢复出厂</Button>
                             </div>
                         </div>
                         <div className="info">
@@ -203,7 +294,7 @@ function DevicePages() {
             <Modal
                 title="危险操作警告"
                 open={open}
-                onOk={handleOk}
+                onOk={() => handleOk(btnType)}
                 confirmLoading={confirmLoading}
                 onCancel={handleCancel}
             >

@@ -1,5 +1,4 @@
-const { ipcMain } = require('electron');
-const path = require('path');
+const { ipcMain,dialog } = require('electron')
 const { getScrcpyPath, getAdbPath } = require('../utils/getScrcpyPath');
 const { exec, spawn } = require('child_process');
 
@@ -284,6 +283,176 @@ function sendHomeKey() {
     });
 }
 
+/**
+ * 进入Bootloader模式
+ */
+function sendBootloader() {
+    ipcMain.handle("send-bootloader", async (event, deviceId) => {
+        return new Promise((resolve, reject) => {
+            const adbPath = getAdbPath();
+            const fullCmd = deviceId ? `"${adbPath}" -s ${deviceId} reboot bootloader` : `"${adbPath}" reboot bootloader`;
+            exec(fullCmd, { encoding: "utf8" }, (err, stdout) => {
+                if (err) {
+                    console.warn(`[ADB] 命令失败: ${fullCmd}`, err.message);
+                    resolve({ success: false, message: err.message }); // 失败返回空
+                }
+                else {
+                    resolve({ success: true, message: "设备已进入Bootloader模式" });
+                }
+            });
+        });
+    });
+}
+
+/**
+ * 解锁Bootloader
+ */
+function sendUnlockBootloader() {
+    ipcMain.handle("send-unlock-bootloader", async (event, deviceId) => {
+        return new Promise((resolve, reject) => {
+            const adbPath = getAdbPath();
+            const fullCmd = deviceId ? `"${adbPath}" -s ${deviceId} oem unlock` : `"${adbPath}" oem unlock`;
+            exec(fullCmd, { encoding: "utf8" }, (err, stdout) => {
+                if (err) {
+                    console.warn(`[ADB] 命令失败: ${fullCmd}`, err.message);
+                    resolve({ success: false, message: err.message }); // 失败返回空
+                }
+                else {
+                    resolve({ success: true, message: "设备Bootloader已解锁" });
+                }
+            });
+        });
+    });
+}
+
+/**
+ * 上锁Bootloader
+ */
+function sendLockBootloader() {
+    ipcMain.handle("send-lock-bootloader", async (event, deviceId) => {
+        return new Promise((resolve, reject) => {
+            const adbPath = getAdbPath();
+            const fullCmd = deviceId ? `"${adbPath}" -s ${deviceId} oem lock` : `"${adbPath}" oem lock`;
+            exec(fullCmd, { encoding: "utf8" }, (err, stdout) => {
+                if (err) {
+                    console.warn(`[ADB] 命令失败: ${fullCmd}`, err.message);
+                    resolve({ success: false, message: err.message }); // 失败返回空
+                }
+                else {
+                    resolve({ success: true, message: "设备Bootloader已上锁" });
+                }
+            });
+        });
+    });
+}
+
+/**
+ * 恢复出厂设置
+ */
+function sendFactoryReset() {
+    ipcMain.handle("send-factory-reset", async (event, deviceId) => {
+        return new Promise((resolve, reject) => {
+            const adbPath = getAdbPath();
+            const fullCmd = deviceId ? `"${adbPath}" -s ${deviceId} shell am broadcast -a android.intent.action.MASTER_CLEAR` : `"${adbPath}" shell am broadcast -a android.intent.action.MASTER_CLEAR`;
+            exec(fullCmd, { encoding: "utf8" }, (err, stdout) => {
+                if (err) {
+                    console.warn(`[ADB] 命令失败: ${fullCmd}`, err.message);
+                    resolve({ success: false, message: err.message }); // 失败返回空
+                }
+                else {
+                    resolve({ success: true, message: "已发送恢复出厂设置命令" });
+                }
+            });
+        });
+    });
+}
+
+/**
+ * 一键Recovery模式
+ */
+function sendRecoveryMode() {
+    ipcMain.handle("send-recovery-mode", async (event, deviceId) => {
+        return new Promise((resolve, reject) => {
+            const adbPath = getAdbPath();
+            const fullCmd = deviceId ? `"${adbPath}" -s ${deviceId} reboot recovery` : `"${adbPath}" reboot recovery`;
+            exec(fullCmd, { encoding: "utf8" }, (err, stdout) => {
+                if (err) {
+                    console.warn(`[ADB] 命令失败: ${fullCmd}`, err.message);
+                    resolve({ success: false, message: err.message }); // 失败返回空
+                }
+                else {
+                    resolve({ success: true, message: "设备已进入Recovery模式" });
+                }
+            });
+        });
+    });
+}
+
+/**
+ * 监听渲染进程发送的adb命令
+ */
+function sendAdbCommand() {
+    ipcMain.handle("send-adb-command", async (event, deviceId, command) => {
+        return new Promise((resolve) => {
+            if (!command || command.trim() === "") {
+                return resolve({ success: false, message: "命令不能为空" });
+            }
+
+            const adbPath = getAdbPath();
+            const fullCmd = deviceId ? `"${adbPath}" -s ${deviceId} ${command}` : `"${adbPath}" ${command}`;
+
+            exec(fullCmd, { encoding: "utf8" }, (err, stdout, stderr) => {
+                if (err) {
+                    console.warn(`[ADB] 命令失败: ${fullCmd}`, err.message);
+                    resolve({ success: false, message: err.message });
+                } else {
+                    resolve({ success: true, message: stdout || stderr || "命令执行成功" });
+                }
+            });
+        });
+    });
+}
+
+/**
+ * 安装apk
+ */
+function installApk() {
+    ipcMain.handle("install-apk", async (event, apkPath) => {
+        return new Promise((resolve) => {
+            if (!apkPath || apkPath.trim() === "") {
+                return resolve({ success: false, message: "APK路径不能为空" });
+            }
+            const adbPath = getAdbPath();
+            const fullCmd = `"${adbPath}" install -r "${apkPath}"`;
+            exec(fullCmd, { encoding: "utf8" }, (err, stdout, stderr) => {
+                if (err) {
+                    console.warn(`[ADB] 安装APK失败: ${fullCmd}`, err.message);
+                    resolve({ success: false, message: err.message });
+                } else {
+                    // 检查输出中是否包含 "Success"
+                    if (stdout.includes("Success") || stderr.includes("Success")) {
+                        resolve({ success: true, message: "APK安装成功" });
+                    } else {
+                        resolve({ success: false, message: stdout || stderr || "APK安装失败" });
+                    }
+                }
+            });
+        });
+    });
+}
+
+function openFileDialog() { 
+    ipcMain.handle('ELECTRON_OPEN_FILE_DIALOG', async () => {
+        return dialog.showOpenDialog({
+            properties: ['openFile'],
+            filters: [
+                { name: 'APK Files', extensions: ['apk'] },
+                { name: 'All Files', extensions: ['*'] }
+            ]
+        });
+    });
+}
+
 module.exports = {
     getAdbDeviceInfo,
     openScrcpy,
@@ -292,5 +461,13 @@ module.exports = {
     sendReboot,
     sendBackKey,
     sendLockScreen,
-    sendHomeKey
+    sendHomeKey,
+    sendBootloader,
+    sendUnlockBootloader,
+    sendLockBootloader,
+    sendFactoryReset,
+    sendRecoveryMode,
+    sendAdbCommand,
+    installApk,
+    openFileDialog
 }

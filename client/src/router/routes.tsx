@@ -11,6 +11,7 @@ const App = lazy(() => import('../App')) // 主视图
 const DevicePages = lazy(() => import('../pages/DevicePages')) // 设备页面
 const TerminalPages = lazy(() => import('../pages/TerminalPages')) // 终端页面
 const AboutPages = lazy(() => import('../pages/AboutPages')) // 关于页面
+const UploadfilePages = lazy(() => import('../pages/UploadfilePages')) // 上传页面
 
 const routes = [
     {
@@ -46,6 +47,14 @@ const routes = [
                 element: (
                     <Suspense fallback={<Spin size="large" />}>
                         <TerminalPages />
+                    </Suspense>
+                )
+            },
+            {
+                path: 'upload',
+                element: (
+                    <Suspense fallback={<Spin size="large" />}>
+                        <UploadfilePages />
                     </Suspense>
                 )
             }
