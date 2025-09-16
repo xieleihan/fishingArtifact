@@ -3,6 +3,7 @@ import './App.scss';
 import Device from './assets/icon/device.svg';
 import About from './assets/icon/about.svg';
 import Terminal from './assets/icon/terminal.svg';
+import XmlLayout from './assets/icon/xml.svg';
 
 import { useState } from 'react';
 import {Outlet,Link} from 'react-router-dom';
@@ -22,6 +23,12 @@ function App() {
       icon: Terminal,
       activity: '#307dee',
       link: '/terminal'
+    },
+    {
+      title: '布局',
+      icon: XmlLayout,
+      activity: '#307dee',
+      link: '/xmllayout'
     },
     {
       title: '关于',

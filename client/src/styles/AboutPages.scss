@@ -18,4 +18,15 @@
             font-weight: bold;
         }
     }
+    .bottom {
+        width: 100%;
+        margin-top: 20px;
+        .imgBox{
+            display: flex;
+            width: fit-content;
+            img{
+                margin: 0 5px;
+            }
+        }
+    }
 }

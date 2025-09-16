@@ -12,6 +12,7 @@ const DevicePages = lazy(() => import('../pages/DevicePages')) // 设备页面
 const TerminalPages = lazy(() => import('../pages/TerminalPages')) // 终端页面
 const AboutPages = lazy(() => import('../pages/AboutPages')) // 关于页面
 const UploadfilePages = lazy(() => import('../pages/UploadfilePages')) // 上传页面
+const XmlLayoutPages = lazy(() => import('../pages/XmllayoutPages')) // 布局页面
 
 const routes = [
     {
@@ -55,6 +56,14 @@ const routes = [
                 element: (
                     <Suspense fallback={<Spin size="large" />}>
                         <UploadfilePages />
+                    </Suspense>
+                )
+            },
+            {
+                path: 'xmllayout',
+                element: (
+                    <Suspense fallback={<Spin size="large" />}>
+                        <XmlLayoutPages />
                     </Suspense>
                 )
             }

@@ -441,6 +441,9 @@ function installApk() {
     });
 }
 
+/**
+ * 使用Eletron的diglog的窗口
+ */
 function openFileDialog() { 
     ipcMain.handle('ELECTRON_OPEN_FILE_DIALOG', async () => {
         return dialog.showOpenDialog({
@@ -452,6 +455,50 @@ function openFileDialog() {
         });
     });
 }
+
+/**
+ * 导出ADB将用户安装的应用包名导出(adb shell pm list packages -3)
+ */
+function exportUserInstalledPackages() {
+    ipcMain.handle("export-user-installed-packages", async (event, deviceId) => {
+        return new Promise((resolve) => {
+            const adbPath = getAdbPath();
+            const fullCmd = deviceId ? `"${adbPath}" -s ${deviceId} shell pm list packages -3` : `"${adbPath}" shell pm list packages -3`;
+            exec(fullCmd, { encoding: "utf8" }, (err, stdout, stderr) => {
+                if (err) {
+                    console.warn(`[ADB] 导出用户安装的应用包名失败: ${fullCmd}`, err.message);
+                    resolve({ success: false, message: err.message });
+                }
+                else {
+                    const packages = stdout.split('\n').map(line => line.replace('package:', '').trim()).filter(line => line);
+                    resolve({ success: true, packages });
+                }
+            });
+        });
+    });
+}
+
+/**
+ * 获取当前安卓的布局xml(adb shell "uiautomator dump --compressed /sdcard/window_dump.xml && cat /sdcard/window_dump.xml && rm /sdcard/window_dump.xml)
+ */
+function getCurrentLayoutXml() { 
+    ipcMain.handle("get-current-layout-xml", async (event, deviceId) => {
+        return new Promise((resolve) => {
+            const adbPath = getAdbPath();
+            const fullCmd = deviceId ? `"${adbPath}" -s ${deviceId} shell "uiautomator dump --compressed /sdcard/window_dump.xml && cat /sdcard/window_dump.xml && rm /sdcard/window_dump.xml"` : `"${adbPath}" shell "uiautomator dump --compressed /sdcard/window_dump.xml && cat /sdcard/window_dump.xml && rm /sdcard/window_dump.xml"`;
+            exec(fullCmd, { encoding: "utf8" }, (err, stdout, stderr) => {
+                if (err) {
+                    console.warn(`[ADB] 获取当前布局XML失败: ${fullCmd}`, err.message);
+                    resolve({ success: false, message: err.message });
+                }
+                else {
+                    resolve({ success: true, xml: stdout });
+                }
+            });
+        });
+    });
+}
+
 
 module.exports = {
     getAdbDeviceInfo,
@@ -469,5 +516,7 @@ module.exports = {
     sendRecoveryMode,
     sendAdbCommand,
     installApk,
-    openFileDialog
+    openFileDialog,
+    exportUserInstalledPackages,
+    getCurrentLayoutXml
 }

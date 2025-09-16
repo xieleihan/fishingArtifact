@@ -16,7 +16,9 @@ const { getAdbDeviceInfo,
     sendRecoveryMode,
     sendAdbCommand,
     installApk,
-    openFileDialog
+    openFileDialog,
+    exportUserInstalledPackages,
+    getCurrentLayoutXml
 } = require(requestPath);
 
 // 注册所有 IPC 处理程序
@@ -36,6 +38,8 @@ sendRecoveryMode();
 sendAdbCommand();
 installApk();
 openFileDialog();
+exportUserInstalledPackages();
+getCurrentLayoutXml();
 
 /**
  * 创建Windows窗口
